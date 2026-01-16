@@ -2,13 +2,13 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <title>Raj AI</title>
+  <title>Dost AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="text-align:center; font-family:Arial; background:#0f172a; color:white;">
 
-  <h2>🤖 Raj AI</h2>
-  <p>🎤 Bolo, main sun raha hoon</p>
+  <h2>🤖 Dost AI</h2>
+  <p>🎤 Or Bhai, Kya haal Hai</p>
 
   <button onclick="startListening()" style="font-size:20px;padding:15px 25px;">
     🎙 Speak
@@ -31,7 +31,7 @@ recognition.onresult = function(event) {
 
   let reply = "Main tumhari baat samajh raha hoon. Tum accha kar rahe ho Rajneesh.";
 
-  document.getElementById("aiText").innerText = "🤖 Raj AI: " + reply;
+  document.getElementById("aiText").innerText = "🤖 Dost AI: " + reply;
 
   let speech = new SpeechSynthesisUtterance(reply);
   speech.lang = 'hi-IN';
