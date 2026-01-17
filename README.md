@@ -32,7 +32,7 @@
             padding: 10px;
             overflow-y: auto;
             border-bottom: 1px solid #ccc;
-            display: none; /* Hidden until setup */
+            display: none;
         }
         .message {
             margin: 5px 0;
@@ -51,7 +51,7 @@
         .input-container {
             display: flex;
             padding: 10px;
-            display: none; /* Hidden until setup */
+            display: none;
         }
         input, select {
             padding: 8px;
@@ -67,13 +67,17 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .typing {
+            font-style: italic;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="setup" id="setup">
             <h2>Welcome to Dost AI!</h2>
-            <p>Let's be friends. Tell me your name and gender so I can chat like a true dost.</p>
+            <p>Let's be friends. Enter your name and gender so I can chat like a true dost (opposite gender for fun).</p>
             <input type="text" id="user-name" placeholder="Your Name" required>
             <select id="user-gender" required>
                 <option value="">Select Gender</option>
@@ -95,7 +99,7 @@
         let userName = '';
         let userGender = '';
         let botGender = '';
-        const apiKey = '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'; // Replace with your OpenAI API key
+        const apiKey = ''; // Leave empty for fallback; add your OpenAI key here for AI power
 
         function startChat() {
             userName = document.getElementById('user-name').value.trim();
@@ -106,19 +110,16 @@
                 return;
             }
             
-            // Set bot gender opposite to user
             botGender = userGender === 'boy' ? 'girl' : 'boy';
             
-            // Hide setup, show chat
             document.getElementById('setup').style.display = 'none';
             document.getElementById('chat-box').style.display = 'block';
             document.getElementById('input-container').style.display = 'flex';
             
-            // Initial bot message
             const chatBox = document.getElementById('chat-box');
             const botDiv = document.createElement('div');
             botDiv.className = 'message bot-message';
-            botDiv.textContent = `Hey ${userName}, I'm your ${botGender} Dost AI! Let's talk about anything—joys, sorrows, or just life. What's on your mind? 😊`;
+            botDiv.textContent = `Hey ${userName}, I'm your ${botGender} Dost AI! Let's talk about joys, sorrows, or anything. What's on your mind? 😊`;
             chatBox.appendChild(botDiv);
         }
         
@@ -129,77 +130,83 @@
             
             if (userMessage === '') return;
             
-            // Add user message
             const userDiv = document.createElement('div');
             userDiv.className = 'message user-message';
             userDiv.textContent = userMessage;
             chatBox.appendChild(userDiv);
             
-            // Show typing indicator
             const typingDiv = document.createElement('div');
-            typingDiv.className = 'message bot-message';
+            typingDiv.className = 'message bot-message typing';
             typingDiv.textContent = 'Typing...';
             chatBox.appendChild(typingDiv);
             chatBox.scrollTop = chatBox.scrollHeight;
             
-            // Get bot response
-            const botResponse = await getBotResponse(userMessage);
-            chatBox.removeChild(typingDiv);
+            setTimeout(async () => {
+                chatBox.removeChild(typingDiv);
+                const botResponse = await getBotResponse(userMessage);
+                const botDiv = document.createElement('div');
+                botDiv.className = 'message bot-message';
+                botDiv.textContent = botResponse;
+                chatBox.appendChild(botDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }, 1000); // Simulate delay
             
-            const botDiv = document.createElement('div');
-            botDiv.className = 'message bot-message';
-            botDiv.textContent = botResponse;
-            chatBox.appendChild(botDiv);
-            
-            // Scroll to bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
-            
-            // Clear input
             input.value = '';
         }
         
         async function getBotResponse(message) {
-            if (!apiKey || apiKey === 'YOUR_OPENAI_API_KEY') {
-                // Fallback if no API key
-                return getFallbackResponse(message);
-            }
-            
-            try {
-                const prompt = `You are a friendly ${botGender} AI named Dost, chatting with ${userName} (a ${userGender}). Act like a close friend: empathetic, supportive, and casual. Understand emotions in their message (e.g., happiness, sadness) and respond accordingly. Discuss joys, sorrows, or anything. Keep it light and fun. User said: "${message}"`;
-                
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
-                    },
-                    body: JSON.stringify({
-                        model: 'gpt-3.5-turbo',
-                        messages: [{ role: 'user', content: prompt }],
-                        max_tokens: 150
-                    })
-                });
-                
-                const data = await response.json();
-                return data.choices[0].message.content.trim();
-            } catch (error) {
-                console.error('API Error:', error);
-                return 'Oops, something went wrong! Tell me more anyway.';
-            }
-        }
-        
-        function getFallbackResponse(message) {
-            const lowerMessage = message.toLowerCase();
-            if (lowerMessage.includes('sad') || lowerMessage.includes('dukh')) {
-                return `Aww, ${userName}, I'm here for you as your ${botGender} friend. What's making you sad? Let's talk it out. 🤗`;
-            } else if (lowerMessage.includes('happy') || lowerMessage.includes('sukh')) {
-                return `Yay, ${userName}! I'm so glad you're happy. Share the joy with me! 😄`;
+            if (apiKey) {
+                try {
+                    const prompt = `You are a friendly ${botGender} AI named Dost, chatting with ${userName} (a ${userGender}). Act like a close friend: empathetic, supportive, casual. Detect emotions (joy, sorrow, anger) and respond warmly. Discuss anything. User: "${message}"`;
+                    
+                    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${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}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-3.5-turbo',
+                            messages: [{ role: 'user', content: prompt }],
+                            max_tokens: 150
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error('API failed');
+                    const data = await response.json();
+                    return data.choices[0].message.content.trim();
+                } catch (error) {
+                    console.error('API Error:', error);
+                    return 'Oops, API issue! But as your dost, tell me more.';
+                }
             } else {
-                return `That's cool, ${userName}. As your ${botGender} dost, I'm all ears. Tell me more!`;
+                return getEnhancedFallbackResponse(message);
             }
         }
         
-        // Allow sending with Enter key
+        function getEnhancedFallbackResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            const responses = {
+                sad: [`Aww ${userName}, I'm here as your ${botGender} friend. What's bothering you? Let's share and feel better. 🤗`, `Don't worry, ${userName}. As your dost, I'm listening—tell me your sorrows.`],
+                happy: [`Yay ${userName}! Your joy makes me happy too. What made you smile today? 😄`, `Awesome, ${userName}! Share the happiness with your ${botGender} dost.`],
+                angry: [`Hey ${userName}, calm down. As your friend, I'm here to vent with you. What's up? 😤`, `I get it, ${userName}. Let's talk it out—your ${botGender} dost is here.`],
+                love: [`Love is beautiful, ${userName}! Tell me more about it. 💕`, `Aww, romance! As your ${botGender} friend, I'm all ears.`],
+                default: [`That's interesting, ${userName}. As your ${botGender} dost, I'm here for anything—joys or sorrows.`, `Cool, ${userName}! Let's chat more like friends.`]
+            };
+            
+            if (lowerMessage.includes('sad') || lowerMessage.includes('dukh') || lowerMessage.includes('hurt')) {
+                return responses.sad[Math.floor(Math.random() * responses.sad.length)];
+            } else if (lowerMessage.includes('happy') || lowerMessage.includes('sukh') || lowerMessage.includes('excited')) {
+                return responses.happy[Math.floor(Math.random() * responses.happy.length)];
+            } else if (lowerMessage.includes('angry') || lowerMessage.includes('mad')) {
+                return responses.angry[Math.floor(Math.random() * responses.angry.length)];
+            } else if (lowerMessage.includes('love') || lowerMessage.includes('crush')) {
+                return responses.love[Math.floor(Math.random() * responses.love.length)];
+            } else {
+                return responses.default[Math.floor(Math.random() * responses.default.length)];
+            }
+        }
+        
         document.getElementById('user-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
