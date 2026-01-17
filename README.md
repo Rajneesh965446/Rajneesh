@@ -1,29 +1,8 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-  <meta charset="UTF-8">
-  <title>Mitra AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-
-<body style="background:#0f172a;color:white;text-align:center;font-family:Arial">
-
-<h1>🤖 Mitra AI</h1>
-<p id="status">🎤 Speak dabao aur baat karo</p>
-
-<button onclick="startListening()" style="font-size:22px;padding:15px 30px;">
-🎙 Speak
-</button>
-
-<p id="userText"></p>
-<p id="aiText"></p>
-
 <script>
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang = 'hi-IN';
 
 let userName = localStorage.getItem("userName");
-
 if (!userName) {
   userName = prompt("Aapka naam kya hai?");
   localStorage.setItem("userName", userName);
@@ -37,17 +16,16 @@ function startListening() {
   recognition.start();
 }
 
-recognition.onresult = function(event) {
+recognition.onresult = async function(event) {
   let userSpeech = event.results[0][0].transcript;
   document.getElementById("userText").innerText = "👤 Tum: " + userSpeech;
 
-  let reply = generateReply(userSpeech);
+  let reply = await getAIReply(userSpeech);
   document.getElementById("aiText").innerText = "🤖 Mitra AI: " + reply;
 
   let speech = new SpeechSynthesisUtterance(reply);
   speech.lang = 'hi-IN';
 
-  // 👦👧 Voice logic (opposite gender)
   if (isFemaleName(userName)) {
     speech.pitch = 0.9; // ladka voice
   } else {
@@ -57,25 +35,29 @@ recognition.onresult = function(event) {
   window.speechSynthesis.speak(speech);
 };
 
-function generateReply(text) {
-  text = text.toLowerCase();
+async function getAIReply(text) {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer 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"
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Tum ek Indian human-like AI dost ho. Naam se bulao, emotional aur simple Hindi me jawab do."
+        },
+        {
+          role: "user",
+          content: text
+        }
+      ]
+    })
+  });
 
-  if (text.includes("kaise ho")) {
-    return "Main theek hoon " + userName + ", tum kaise ho?";
-  }
-  if (text.includes("dukhi")) {
-    return "Mujhe afsos hai " + userName + ", main tumhare saath hoon.";
-  }
-  if (text.includes("padhai")) {
-    return userName + ", focus rakho, tum accha kar rahe ho.";
-  }
-  if (text.includes("hello") || text.includes("hi")) {
-    return "Hello " + userName + "! Tumse baat karke accha laga.";
-  }
-
-  return "Samajh raha hoon " + userName + ", aur batao.";
+  const data = await response.json();
+  return data.choices[0].message.content;
 }
 </script>
-
-</body>
-</html>
