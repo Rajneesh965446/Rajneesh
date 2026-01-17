@@ -88,14 +88,14 @@
             <button onclick="startChat()">Start Chatting!</button>
         </div>
         
-        <div class="chat-box" id="chat-box"></div>
+ <div class="chat-box" id="chat-box"></div>
         <div class="input-container" id="input-container">
             <input type="text" id="user-input" placeholder="Type your message...">
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
 
-    <script>
+ <script>
         let userName = '';
         let userGender = '';
         let botGender = '';
@@ -218,46 +218,37 @@
 <script>
 const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
 recognition.lang = 'hi-IN';
-
 let userName = localStorage.getItem("userName");
 if (!userName) {
   userName = prompt("Aapka naam kya hai?");
   localStorage.setItem("userName", userName);
 }
-
 function isFemaleName(name) {
   return name.toLowerCase().endsWith("a") || name.toLowerCase().endsWith("i");
 }
-
 function startListening() {
   recognition.start();
 }
-
 recognition.onresult = async function(event) {
   let userSpeech = event.results[0][0].transcript;
   document.getElementById("userText").innerText = "👤 Tum: " + userSpeech;
-
-  let reply = await getAIReply(userSpeech);
+ let reply = await getAIReply(userSpeech);
   document.getElementById("aiText").innerText = "🤖 Mitra AI: " + reply;
-
-  let speech = new SpeechSynthesisUtterance(reply);
+let speech = new SpeechSynthesisUtterance(reply);
   speech.lang = 'hi-IN';
-
-  if (isFemaleName(userName)) {
+if (isFemaleName(userName)) {
     speech.pitch = 0.9; // ladka voice
   } else {
     speech.pitch = 1.4; // ladki voice
   }
-
-  window.speechSynthesis.speak(speech);
+ window.speechSynthesis.speak(speech);
 };
-
 async function getAIReply(text) {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": "Bearer YOUR_API_KEY_HERE"
+      "Authorization": "Bearer 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"
     },
     body: JSON.stringify({
       model: "gpt-4o-mini",
@@ -273,8 +264,7 @@ async function getAIReply(text) {
       ]
     })
   });
-
-  const data = await response.json();
+ const data = await response.json();
   return data.choices[0].message.content;
 }
 </script>
